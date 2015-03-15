@@ -1,0 +1,18 @@
+<?php
+
+/*
+ *
+ * Example database config file
+ *
+ * Change the settings and rename config.php.example -> config.php
+ *
+ * NOTE: Remember to keep config files out of version control when those are published in public repository
+ *
+ */
+
+define('DB_USERNAME', 'your-db-username');
+define('DB_PASSWORD', 'your-db-password');
+define('DB_HOST',     'localhost'       );
+define('DB_NAME',     'php-crud-example');
+
+?>
