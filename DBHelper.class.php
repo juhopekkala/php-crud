@@ -24,18 +24,14 @@ class DBHelper {
         }
     }
 
-    protected function connect() {
-        /*$dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
-
-        try {
-            $this->pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-
-        } catch(PDOException $e) {
-            echo 'Error: ' . $e->getMessage();
-            exit;
-        }*/
-    }
-
+    /**
+     *
+     * The connection remains active for the lifetime of that PDO object. 
+     * To close the connection, you need to destroy the object by ensuring that all remaining references to it are deleted.
+     * You do this by assigning NULL to the variable that holds the object. 
+     * If you don't do this explicitly, PHP will automatically close the connection when your script ends.
+     *
+     */
     public function disconnect() {
         $this->pdo = null;
     }
@@ -47,16 +43,16 @@ class DBHelper {
      */
     public function select($table, $conditions) {
         try {
-            $values = array();
+            $data  = array();
             $where = "";
 
             foreach($conditions as $k => $v) {
                 $where .= " AND " . $k . " LIKE :" . $k;
-                $values[":" . $k] = $k;
+                $data[":" . $k] = $k;
             }
 
             $statement = $this->pdo->prepare("SELECT * FROM " . $table . " WHERE 1=1 " . $where);
-            $statement->execute($values);
+            $statement->execute($data);
 
             $response = $statement->fetchAll(PDO::FETCH_ASSOC);
 
@@ -67,11 +63,28 @@ class DBHelper {
         return $response;
     }
 
-    public function insert($table, $columns) {
+    public function insert($table, $columnValues) {
         try {
+            $data    = array();
+            $values  = "";
+            $columns = "";
+
+            foreach($columnValues as $k => $v) {
+                $columns .= $k . ", ";
+                $values  .= ":" . $k . ", ";
+                $data[":" . $k] = $v;
+            }
+
+            $columns = rtrim($columns, ', ');
+            $values  = rtrim($values, ', ');
+
+            $statement = $this->pdo->prepare("INSERT INTO $table($columns) VALUES($values)");
+            $statement->execute($data);
+
+            $response = $statement->rowCount();
 
         } catch(PDOException $e) {
-
+            echo 'Error: Insert failed: ' . $e->getMessage();
         }
     }
 
@@ -79,7 +92,7 @@ class DBHelper {
         try {
 
         } catch(PDOException $e) {
-
+            echo 'Error: Update failed: ' . $e->getMessage();
         }
     }
 
@@ -87,7 +100,7 @@ class DBHelper {
         try {
 
         } catch(PDOException $e) {
-
+            echo 'Error: Delete failed: ' . $e->getMessage();
         }
     }
 }
